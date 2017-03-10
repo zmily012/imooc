@@ -1,0 +1,122 @@
+<html>
+<head>
+	<meta charset="utf-8">	
+	<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+	<div class="slider">
+		<div class="main" id="template_main">
+			<div class="main-i {{css}}" id="main_{{index}}">
+				<img src="img/{{index}}.jpg" class="picture" onload="movePictures()">
+				<div class="caption">
+					<h2>{{h2}}</h2>
+					<h3>{{h3}}</h3>
+				</div>				
+			</div>
+		</div>
+
+		<div class="ctrl"  id="template_ctrl">
+			<a href="javascript:switchSlider({{index}});" class="ctrl-i" id="ctrl_{{index}}"><img src="img/{{index}}.jpg"></a>		
+		</div>
+	</div>
+	<script type="text/javascript">
+		var data=[
+			{img:1,h1:'Creative',h2:'DUET'},
+			{img:2,h1:'Creative2',h2:'DUET2'},
+			{img:3,h1:'Creative3',h2:'DUET3'},
+			{img:4,h1:'Creative4',h2:'DUET4'},
+			{img:5,h1:'Creative5',h2:'DUET5'},
+			{img:6,h1:'Creative6',h2:'DUET6'},
+			{img:7,h1:'Creative7',h2:'DUET7'}
+		];
+
+		// 通用函数
+		var g=function(id){
+			if ( id.substr(0,1) == '.') {
+				return document.getElementsByClassName(id.substr(1));
+			}
+			return document.getElementById(id);
+		}
+
+		function addSliders(){
+			// 去掉开头结尾空白
+			var tpl_main=g('template_main').innerHTML.replace(/^\s*/,'')
+			.replace(/\s*$/,'');
+
+			var tpl_ctrl=g('template_ctrl').innerHTML.replace(/^\s*/,'')
+			.replace(/\s*$/,'');
+
+			// 定义最终输出的HTML变量
+			var out_main=[];
+			var out_ctrl=[];	
+			// 遍历2所有数据，构建最终输出的HTML
+			for(var i in data){
+				var _html_main=tpl_main.replace(/{{index}}/g,data[i].img)
+									   .replace(/{{h2}}/g,data[i].h1)
+									   .replace(/{{h3}}/g,data[i].h2)
+									   .replace(/{{css}}/g,['','main-i_right'][i%2]);
+				var _html_ctrl=tpl_ctrl.replace(/{{index}}/g,data[i].img);
+				
+				out_main.push(_html_main);	
+				out_ctrl.push(_html_ctrl);				  
+			}
+			
+			// 把HTML回写到对应的DOM节点
+			g('template_main').innerHTML = out_main.join(''); //拼接成字符串
+			g('template_ctrl').innerHTML = out_ctrl.join('');
+
+			/*增加#main_background  变换过程中出现的背景图*/
+			/*此处可不需要使用replace替换
+			g('template_main').innerHTML += tpl_main
+									   .replace(/{{index}}/g,'{{index}}')
+									   .replace(/{{h2}}/g,data[1].h1)
+									   .replace(/{{h3}}/g,data[1].h2); console.log(i);
+			*/
+			g('template_main').innerHTML += tpl_main;
+			g('main_{{index}}').id = 'main_background';
+
+		}
+
+		function switchSlider(n){
+			var main=g('main_'+n);
+			var ctrl=g('ctrl_'+n);
+		
+			// 获得所有的幻灯片以及控制按钮
+			var clear_main=g('.main-i');
+			var clear_ctrl=g('.ctrl-i');
+			//清除他们的 active 样式
+			for(var i=0;i<clear_ctrl.length;i++){
+				clear_main[i].className=clear_main[i].className.replace(' main-i_active','');
+				clear_ctrl[i].className=clear_ctrl[i].className.replace(' ctrl-i_active','');
+			}
+
+			main.className += ' main-i_active';
+			ctrl.className += ' ctrl-i_active';
+
+			// 切换时，复制上一张幻灯片到 main_background 中
+
+			setTimeout(function(){
+				g('main_background').innerHTML = main.innerHTML;
+			},1000);  /*延迟一秒执行，当切换完成时main_background才变化*/
+		}
+
+		// 动态调整图片的 margin-top 以使其垂直居中
+		function movePictures(){
+			var pictures = g('.picture');
+			for(var i=0;i<pictures.length;i++){
+				pictures[i].style.marginTop = -(pictures[i].clientHeight/2)+'px';
+			}
+		}
+		window.onload=function(){
+			addSliders();
+			switchSlider(1);
+			/*setTimeout(function(){
+				movePictures();
+			},100);*/ 
+		}
+
+	</script>
+
+
+</body>
+</html>
